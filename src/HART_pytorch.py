@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-#from dataHHAR import processedDataX, processedDataY
 from torch.utils.data import TensorDataset, DataLoader
 import torch.optim as optim
 from src.stepbystep.v2 import StepByStep
@@ -171,6 +170,7 @@ class HART(nn.Module):
         logits = self.classifier(global_average)
         return logits
 
+
 processedDataX = np.load('x.npy')
 processedDataY = np.load('y.npy')
 
@@ -198,12 +198,13 @@ loss = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
 sbs_seq = StepByStep(model, loss, optimizer)
 sbs_seq.set_loaders(train_loader, test_loader)
-sbs_seq.load_checkpoint('HART_NewPreprocessing_full_dataset_lr=0.0001_no_overlapping')
-sbs_seq.train(100)
-#sbs_seq.save_checkpoint('HART_300epochs')
-sbs_seq.save_checkpoint('HART_NewPreprocessing_full_dataset_lr=0.0001_no_overlapping')
+sbs_seq.load_checkpoint('HART_divided_by_activity')
+#sbs_seq.train(50)
+#sbs_seq.save_checkpoint('HART_divided_by_activity')
 sbs_seq.plot_losses()
 plt.show()
+
+
 model = sbs_seq.model
 
 class Submodel(nn.Module):
@@ -215,10 +216,9 @@ class Submodel(nn.Module):
         x = self.features(x)
         return x
 
-# Esempio di utilizzo
-# model è il tuo modello PyTorch originale
-# num_layers è il numero di layer che vuoi mantenere nel sottomodello
+
 submodel = Submodel(model, -3)
+
 
 def extract_features(dataloader, model):
     model.eval()
@@ -236,9 +236,10 @@ def extract_features(dataloader, model):
     return features, labels
 
 
-features, labels = extract_features(test_loader, submodel)
+features, labels = extract_features(train_loader, submodel)
 from sklearn.manifold import TSNE
 import numpy as np
+
 for perplexity in range(1, 50, 10):
     tsne = TSNE(n_components=2, verbose=1, perplexity=perplexity, n_iter=5000)
     tsne_results = tsne.fit_transform(features)
@@ -249,22 +250,27 @@ for perplexity in range(1, 50, 10):
         plt.scatter(tsne_results[indices, 0], tsne_results[indices, 1], label=label, alpha=0.5)
     plt.legend(markerscale=2)
     plt.title('t-SNE of Submodel Features')
-    plt.xlabel('t-SNE dimension 1')
-    plt.ylabel('t-SNE dimension 2')
     plt.show()
 
-
-#sbs_seq.save_checkpoint('HART_1000epochs')
-#fig = sbs_seq.plot_losses()
-#plt.show()
 '''
-print('ok')
-iterator = iter(dataloader)
-x_batch, y_batch = next(iterator)
-out = model(x_batch)
-'''
-print('ok')
+fig, axes = plt.subplots(nrows=5, ncols=1, figsize=(10, 50))
+perplexities = range(1, 50, 10)
 
+for i, perplexity in enumerate(perplexities):
+    tsne = TSNE(n_components=2, verbose=1, perplexity=perplexity, n_iter=5000)
+    tsne_results = tsne.fit_transform(features)
+
+    ax = axes[i]
+    ax.set_aspect(1)
+    for label in np.unique(labels):
+        indices = labels == label
+        ax.scatter(tsne_results[indices, 0], tsne_results[indices, 1], label=label, alpha=0.5)
+    ax.legend(markerscale=2)
+    ax.set_title(f't-SNE with perplexity {perplexity}')
+
+plt.tight_layout()
+plt.show()
+'''
 
 #(32, 128, 6) -> (32, 128, 3),(32, 128, 3) -> (32, 8, 96), (32, 8, 96) -> (32, 8, 192) -> (32, 8, 48), (32, 8, 96), (32, 8, 48) -> (32, 8, 196) -> (32, 196) -> (32, 1024) -> (32, 10)
 #                                                                                             MHA x 3     LC x 6      MHA x 3
