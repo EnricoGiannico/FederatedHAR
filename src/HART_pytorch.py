@@ -234,6 +234,19 @@ plt.show()
 submodel = HART_encoder(activityCount=6, projection_dim=192, patchSize=16, timeStep=16, patchCount=8)
 checkpoint = torch.load('HART_divided_by_activity')
 
+
+from collections import OrderedDict
+
+def restringi_a_sottoinsieme_chiavi(dizionario, chiavi_da_mantenere):
+    return OrderedDict((k, dizionario[k]) for k in chiavi_da_mantenere if k in dizionario)
+
+keys = ['sensorPatches.accProjection.weight', 'sensorPatches.accProjection.bias', 'sensorPatches.gyroProjection.weight', 'sensorPatches.gyroProjection.bias', 'patchEncoder.position_embedding.weight', 'AttentionCombinedList.0.layerNormalizer1.norm.weight', 'AttentionCombinedList.0.layerNormalizer1.norm.bias', 'AttentionCombinedList.0.accMHA.MHA.in_proj_weight', 'AttentionCombinedList.0.accMHA.MHA.in_proj_bias', 'AttentionCombinedList.0.accMHA.MHA.out_proj.weight', 'AttentionCombinedList.0.accMHA.MHA.out_proj.bias', 'AttentionCombinedList.0.lightConv.depthwise_conv.weight', 'AttentionCombinedList.0.gyroMHA.MHA.in_proj_weight', 'AttentionCombinedList.0.gyroMHA.MHA.in_proj_bias', 'AttentionCombinedList.0.gyroMHA.MHA.out_proj.weight', 'AttentionCombinedList.0.gyroMHA.MHA.out_proj.bias', 'AttentionCombinedList.0.layerNormalizer2.norm.weight', 'AttentionCombinedList.0.layerNormalizer2.norm.bias', 'AttentionCombinedList.0.mlp2.fc1.weight', 'AttentionCombinedList.0.mlp2.fc1.bias', 'AttentionCombinedList.0.mlp2.fc2.weight', 'AttentionCombinedList.0.mlp2.fc2.bias', 'AttentionCombinedList.1.layerNormalizer1.norm.weight', 'AttentionCombinedList.1.layerNormalizer1.norm.bias', 'AttentionCombinedList.1.accMHA.MHA.in_proj_weight', 'AttentionCombinedList.1.accMHA.MHA.in_proj_bias', 'AttentionCombinedList.1.accMHA.MHA.out_proj.weight', 'AttentionCombinedList.1.accMHA.MHA.out_proj.bias', 'AttentionCombinedList.1.lightConv.depthwise_conv.weight', 'AttentionCombinedList.1.gyroMHA.MHA.in_proj_weight', 'AttentionCombinedList.1.gyroMHA.MHA.in_proj_bias', 'AttentionCombinedList.1.gyroMHA.MHA.out_proj.weight', 'AttentionCombinedList.1.gyroMHA.MHA.out_proj.bias', 'AttentionCombinedList.1.layerNormalizer2.norm.weight', 'AttentionCombinedList.1.layerNormalizer2.norm.bias', 'AttentionCombinedList.1.mlp2.fc1.weight', 'AttentionCombinedList.1.mlp2.fc1.bias', 'AttentionCombinedList.1.mlp2.fc2.weight', 'AttentionCombinedList.1.mlp2.fc2.bias', 'AttentionCombinedList.2.layerNormalizer1.norm.weight', 'AttentionCombinedList.2.layerNormalizer1.norm.bias', 'AttentionCombinedList.2.accMHA.MHA.in_proj_weight', 'AttentionCombinedList.2.accMHA.MHA.in_proj_bias', 'AttentionCombinedList.2.accMHA.MHA.out_proj.weight', 'AttentionCombinedList.2.accMHA.MHA.out_proj.bias', 'AttentionCombinedList.2.lightConv.depthwise_conv.weight', 'AttentionCombinedList.2.gyroMHA.MHA.in_proj_weight', 'AttentionCombinedList.2.gyroMHA.MHA.in_proj_bias', 'AttentionCombinedList.2.gyroMHA.MHA.out_proj.weight', 'AttentionCombinedList.2.gyroMHA.MHA.out_proj.bias', 'AttentionCombinedList.2.layerNormalizer2.norm.weight', 'AttentionCombinedList.2.layerNormalizer2.norm.bias', 'AttentionCombinedList.2.mlp2.fc1.weight', 'AttentionCombinedList.2.mlp2.fc1.bias', 'AttentionCombinedList.2.mlp2.fc2.weight', 'AttentionCombinedList.2.mlp2.fc2.bias', 'AttentionCombinedList.3.layerNormalizer1.norm.weight', 'AttentionCombinedList.3.layerNormalizer1.norm.bias', 'AttentionCombinedList.3.accMHA.MHA.in_proj_weight', 'AttentionCombinedList.3.accMHA.MHA.in_proj_bias', 'AttentionCombinedList.3.accMHA.MHA.out_proj.weight', 'AttentionCombinedList.3.accMHA.MHA.out_proj.bias', 'AttentionCombinedList.3.lightConv.depthwise_conv.weight', 'AttentionCombinedList.3.gyroMHA.MHA.in_proj_weight', 'AttentionCombinedList.3.gyroMHA.MHA.in_proj_bias', 'AttentionCombinedList.3.gyroMHA.MHA.out_proj.weight', 'AttentionCombinedList.3.gyroMHA.MHA.out_proj.bias', 'AttentionCombinedList.3.layerNormalizer2.norm.weight', 'AttentionCombinedList.3.layerNormalizer2.norm.bias', 'AttentionCombinedList.3.mlp2.fc1.weight', 'AttentionCombinedList.3.mlp2.fc1.bias', 'AttentionCombinedList.3.mlp2.fc2.weight', 'AttentionCombinedList.3.mlp2.fc2.bias', 'AttentionCombinedList.4.layerNormalizer1.norm.weight', 'AttentionCombinedList.4.layerNormalizer1.norm.bias', 'AttentionCombinedList.4.accMHA.MHA.in_proj_weight', 'AttentionCombinedList.4.accMHA.MHA.in_proj_bias', 'AttentionCombinedList.4.accMHA.MHA.out_proj.weight', 'AttentionCombinedList.4.accMHA.MHA.out_proj.bias', 'AttentionCombinedList.4.lightConv.depthwise_conv.weight', 'AttentionCombinedList.4.gyroMHA.MHA.in_proj_weight', 'AttentionCombinedList.4.gyroMHA.MHA.in_proj_bias', 'AttentionCombinedList.4.gyroMHA.MHA.out_proj.weight', 'AttentionCombinedList.4.gyroMHA.MHA.out_proj.bias', 'AttentionCombinedList.4.layerNormalizer2.norm.weight', 'AttentionCombinedList.4.layerNormalizer2.norm.bias', 'AttentionCombinedList.4.mlp2.fc1.weight', 'AttentionCombinedList.4.mlp2.fc1.bias', 'AttentionCombinedList.4.mlp2.fc2.weight', 'AttentionCombinedList.4.mlp2.fc2.bias', 'AttentionCombinedList.5.layerNormalizer1.norm.weight', 'AttentionCombinedList.5.layerNormalizer1.norm.bias', 'AttentionCombinedList.5.accMHA.MHA.in_proj_weight', 'AttentionCombinedList.5.accMHA.MHA.in_proj_bias', 'AttentionCombinedList.5.accMHA.MHA.out_proj.weight', 'AttentionCombinedList.5.accMHA.MHA.out_proj.bias', 'AttentionCombinedList.5.lightConv.depthwise_conv.weight', 'AttentionCombinedList.5.gyroMHA.MHA.in_proj_weight', 'AttentionCombinedList.5.gyroMHA.MHA.in_proj_bias', 'AttentionCombinedList.5.gyroMHA.MHA.out_proj.weight', 'AttentionCombinedList.5.gyroMHA.MHA.out_proj.bias', 'AttentionCombinedList.5.layerNormalizer2.norm.weight', 'AttentionCombinedList.5.layerNormalizer2.norm.bias', 'AttentionCombinedList.5.mlp2.fc1.weight', 'AttentionCombinedList.5.mlp2.fc1.bias', 'AttentionCombinedList.5.mlp2.fc2.weight', 'AttentionCombinedList.5.mlp2.fc2.bias', 'layerNormalizer.norm.weight', 'layerNormalizer.norm.bias']
+dict = restringi_a_sottoinsieme_chiavi(checkpoint['model_state_dict'], keys)
+
+checkpoint['model_state_dict'] = dict
+
+
+
 submodel.load_state_dict(checkpoint['model_state_dict'])
 
 '''
@@ -246,7 +259,7 @@ class Submodel(nn.Module):
         x = self.features(x)
         return x
 '''
-
+'''
 class Submodel(nn.Module):
     def __init__(self, original_model, num_layers):
         super(Submodel, self).__init__()
@@ -258,6 +271,7 @@ class Submodel(nn.Module):
 
 
 submodel = Submodel(model, -2)
+'''
 
 
 def extract_features(dataloader, model):
@@ -276,10 +290,10 @@ def extract_features(dataloader, model):
     return features, labels
 
 
-features, labels = extract_features(train_loader, submodel)
+features, labels = extract_features(test_loader, submodel)
 from sklearn.manifold import TSNE
 import numpy as np
-'''
+
 for perplexity in range(1, 50, 10):
     tsne = TSNE(n_components=2, verbose=1, perplexity=perplexity, n_iter=5000)
     tsne_results = tsne.fit_transform(features)
@@ -291,7 +305,7 @@ for perplexity in range(1, 50, 10):
     plt.legend(markerscale=2)
     plt.title('t-SNE of Submodel Features')
     plt.show()
-'''
+
 '''
 fig, axes = plt.subplots(nrows=5, ncols=1, figsize=(10, 50))
 perplexities = range(1, 50, 10)
