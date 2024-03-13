@@ -133,7 +133,7 @@ for clientDeviceIndex, deviceName in enumerate(deviceCounts):
                 s_gyro_np = interpolate_signal(df2, 1, size_output_signal=size_output_signal)
                 x = np.hstack((s_acc_np, s_gyro_np))
                 list_x.append(x)
-                list_y.append(np.array([activityName]))
+                list_y.append(np.array([activityIndex]))
                 list_user.append(np.array([clientIDName]))
 
 x = np.stack(list_x)

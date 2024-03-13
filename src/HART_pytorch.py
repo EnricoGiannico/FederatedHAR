@@ -171,6 +171,33 @@ class HART(nn.Module):
         return logits
 
 
+
+
+class HART_encoder(nn.Module):
+    def __init__(self, activityCount, projection_dim, patchSize, timeStep, patchCount=None, convKernels = [3, 7, 15, 31, 31, 31]):
+        super(HART_encoder, self).__init__()
+        self.activityCount = activityCount
+        self.convKernels = convKernels
+        self.sensorPatches = SensorPatches(projection_dim, patchSize, timeStep)
+        self.patchEncoder = PatchEncoder(num_patches=patchCount, projection_dim=projection_dim)
+        self.AttentionCombinedList = nn.ModuleList([AttentionCombined(kernel_size=i) for i in convKernels])
+        self.layerNormalizer = LayerNorm(normalized_shape=192)
+
+    def forward(self, x):
+        x = self.sensorPatches(x)
+        x = self.patchEncoder(x)
+        x = self.layerNormalizer(x)
+        input = x
+        for index, _ in enumerate(self.convKernels):
+            output = self.AttentionCombinedList[index](input)
+            input = input + output
+        representation = self.layerNormalizer(input)
+        return representation
+
+
+
+
+
 processedDataX = np.load('x.npy')
 processedDataY = np.load('y.npy')
 
@@ -204,9 +231,12 @@ sbs_seq.load_checkpoint('HART_divided_by_activity')
 sbs_seq.plot_losses()
 plt.show()
 
+submodel = HART_encoder(activityCount=6, projection_dim=192, patchSize=16, timeStep=16, patchCount=8)
+checkpoint = torch.load('HART_divided_by_activity')
 
-model = sbs_seq.model
+submodel.load_state_dict(checkpoint['model_state_dict'])
 
+'''
 class Submodel(nn.Module):
     def __init__(self, original_model, num_layers):
         super(Submodel, self).__init__()
@@ -215,9 +245,19 @@ class Submodel(nn.Module):
     def forward(self, x):
         x = self.features(x)
         return x
+'''
+
+class Submodel(nn.Module):
+    def __init__(self, original_model, num_layers):
+        super(Submodel, self).__init__()
+        self.modules_list = list(original_model.children())[:num_layers]
+
+    def forward(self, x):
+        x = self.features(x)
+        return x
 
 
-submodel = Submodel(model, -3)
+submodel = Submodel(model, -2)
 
 
 def extract_features(dataloader, model):
@@ -239,7 +279,7 @@ def extract_features(dataloader, model):
 features, labels = extract_features(train_loader, submodel)
 from sklearn.manifold import TSNE
 import numpy as np
-
+'''
 for perplexity in range(1, 50, 10):
     tsne = TSNE(n_components=2, verbose=1, perplexity=perplexity, n_iter=5000)
     tsne_results = tsne.fit_transform(features)
@@ -251,7 +291,7 @@ for perplexity in range(1, 50, 10):
     plt.legend(markerscale=2)
     plt.title('t-SNE of Submodel Features')
     plt.show()
-
+'''
 '''
 fig, axes = plt.subplots(nrows=5, ncols=1, figsize=(10, 50))
 perplexities = range(1, 50, 10)
@@ -271,6 +311,24 @@ for i, perplexity in enumerate(perplexities):
 plt.tight_layout()
 plt.show()
 '''
+
+from sklearn.metrics import accuracy_score
+
+model.eval()  # Set the model to evaluation mode
+y_true = []
+y_pred = []
+
+with torch.no_grad():  # No need to track the gradients
+    for inputs, labels in test_loader:
+        outputs = model(inputs)
+        _, predicted = torch.max(outputs, 1)
+
+        y_true.extend(labels.numpy())
+        y_pred.extend(predicted.numpy())
+
+# Now, y_true and y_pred can be used to calculate accuracy or other metrics
+accuracy = accuracy_score(y_true, y_pred)
+print(accuracy)
 
 #(32, 128, 6) -> (32, 128, 3),(32, 128, 3) -> (32, 8, 96), (32, 8, 96) -> (32, 8, 192) -> (32, 8, 48), (32, 8, 96), (32, 8, 48) -> (32, 8, 196) -> (32, 196) -> (32, 1024) -> (32, 10)
 #                                                                                             MHA x 3     LC x 6      MHA x 3
