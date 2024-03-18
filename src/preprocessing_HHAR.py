@@ -17,23 +17,14 @@ def load_file_gyro():
     return dataframe
 
 
-def downSampleLowPass(motionData,factor):
-    accX = signal.decimate(motionData[:,:,0],factor)
-    accY = signal.decimate(motionData[:,:,1],factor)
-    accZ = signal.decimate(motionData[:,:,2],factor)
-    gyroX = signal.decimate(motionData[:, :, 3], factor)
-    gyroY = signal.decimate(motionData[:, :, 4], factor)
-    gyroZ = signal.decimate(motionData[:, :, 5], factor)
-    return np.dstack((accX, accY, accZ, gyroX, gyroY, gyroZ))
-
 
 AccData = load_file_acc()
 GyroData = load_file_gyro()
 
 AccData['Arrival_Time'] = pd.to_datetime(AccData['Arrival_Time'], unit='ms')
-AccData['Creation_Time'] = pd.to_datetime(AccData['Creation_Time'], unit='ns')
+#AccData['Creation_Time'] = pd.to_datetime(AccData['Creation_Time'], unit='ns')
 GyroData['Arrival_Time'] = pd.to_datetime(GyroData['Arrival_Time'], unit='ms')
-GyroData['Creation_Time'] = pd.to_datetime(GyroData['Creation_Time'], unit='ns')
+#GyroData['Creation_Time'] = pd.to_datetime(GyroData['Creation_Time'], unit='ns')
 
 classCounts = ['stairsdown','stairsup','bike','sit','stand','walk']
 deviceCounts = ['nexus4','s3', 's3mini','samsungold']
